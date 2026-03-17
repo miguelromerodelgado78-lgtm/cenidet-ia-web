@@ -1,22 +1,25 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-import dj_database_url # <--- IMPORTANTE: Instala esto (pip install dj-database-url)
+import dj_database_url
 
+# Directorio base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Seguridad
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9^ed7dcv-v_nc8$6!x827l-q5yio7l*39gls(k8(=1n04^eaf^')
 
-# CAMBIO PARA RENDER: DEBUG es False en producción
+# DEBUG es False en Render (Producción), True en Local
 DEBUG = 'RENDER' not in os.environ
 
-# CAMBIO PARA RENDER: Permitir el dominio de Render
+# Permitir todos los hosts en Render
 ALLOWED_HOSTS = ['*']
 if not DEBUG:
     RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
     if RENDER_EXTERNAL_HOSTNAME:
         ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
+# Aplicaciones
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -30,10 +33,11 @@ INSTALLED_APPS = [
     'publications',
 ]
 
+# Middleware (Orden corregido para WhiteNoise)
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # <--- CAMBIO PARA RENDER: Manejo de archivos estáticos
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Debe ir después de SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -61,8 +65,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# CAMBIO PARA RENDER: Base de datos dinámica
-# Si detecta la URL de Render usa esa, si no, usa tu local
+# Base de datos (PostgreSQL en Render / Local en desarrollo)
 DATABASES = {
     'default': dj_database_url.config(
         default='postgresql://postgres:Postgres123@localhost:5432/cenidet_db',
@@ -70,6 +73,7 @@ DATABASES = {
     )
 }
 
+# Validadores de contraseña
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -77,22 +81,30 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+# Internacionalización
+LANGUAGE_CODE = 'es-mx' # Cambiado a español
+TIME_ZONE = 'America/Mexico_City'
 USE_I18N = True
 USE_TZ = True
 
-# CAMBIO PARA RENDER: Archivos estáticos
-STATIC_URL = 'static/'
+# --- CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS (CRÍTICO PARA RENDER) ---
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Usamos la versión "Compressed" que es más estable en Render que la "Manifest"
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# Seguridad Extra para HTTPS en Render
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+
+# CORS y Media
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_HEADERS = ["accept", "authorization", "content-type", "user-agent", "x-csrftoken", "x-requested-with"]
-
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Django Rest Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
