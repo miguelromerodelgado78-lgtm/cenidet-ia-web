@@ -9,8 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Seguridad
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9^ed7dcv-v_nc8$6!x827l-q5yio7l*39gls(k8(=1n04^eaf^')
 
-# DEBUG es False en Render (Producción), True en Local
-DEBUG = 'RENDER' not in os.environ
+# DEBUG: Se activa si la variable RENDER_DEBUG existe en Render o si estás en local
+DEBUG = os.environ.get('RENDER_DEBUG', 'False').lower() == 'true' or 'RENDER' not in os.environ
 
 # Permitir todos los hosts en Render
 ALLOWED_HOSTS = ['*']
@@ -33,11 +33,11 @@ INSTALLED_APPS = [
     'publications',
 ]
 
-# Middleware (Orden corregido para WhiteNoise)
+# Middleware (Orden crucial para WhiteNoise)
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Debe ir después de SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -65,11 +65,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-# Base de datos (PostgreSQL en Render / Local en desarrollo)
+# --- CONFIGURACIÓN DE BASE DE DATOS (PROTEGIDA) ---
+# Si DATABASE_URL empieza con postgres://, dj_database_url lo maneja bien, 
+# pero forzamos ssl_require para evitar el Error 500 en Render.
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:Postgres123@localhost:5432/cenidet_db',
-        conn_max_age=600
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:Postgres123@localhost:5432/cenidet_db'),
+        conn_max_age=600,
+        ssl_require=not DEBUG
     )
 }
 
@@ -82,19 +85,19 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internacionalización
-LANGUAGE_CODE = 'es-mx' # Cambiado a español
+LANGUAGE_CODE = 'es-mx'
 TIME_ZONE = 'America/Mexico_City'
 USE_I18N = True
 USE_TZ = True
 
-# --- CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS (CRÍTICO PARA RENDER) ---
+# --- ARCHIVOS ESTÁTICOS ---
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Usamos la versión "Compressed" que es más estable en Render que la "Manifest"
+# Versión estable de WhiteNoise para evitar errores de archivos faltantes
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-# Seguridad Extra para HTTPS en Render
+# Seguridad HTTPS en Render
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
