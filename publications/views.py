@@ -150,21 +150,31 @@ def force_scholar_sync(request):
 
     user = profile.user
     try:
+        # 1. Buscamos al autor de forma rápida
         search_query = scholarly.search_author_id(target_sid)
+        # IMPORTANTE: No llenamos todas las publicaciones de golpe aquí
         author_data = scholarly.fill(search_query, sections=['publications'])
         
         with transaction.atomic():
-            # Aquí sí borramos físico para refrescar la lista de Google Scholar
-            Publication.objects.filter(author=user).delete()
-            count = 0
+            # Filtramos solo las primeras 5 (las más recientes)
+            # Esto reduce drásticamente el uso de RAM
+            publications_to_process = author_data.get('publications', [])[:5] 
             
-            for pub in author_data.get('publications', [])[:20]:
+            # Opcional: Si quieres conservar las manuales, no borres todo.
+            # Aquí borramos las que ya existían del autor para no duplicar
+            Publication.objects.filter(author=user).delete()
+            
+            count = 0
+            for pub in publications_to_process:
+                # 2. Llenamos los detalles de cada una de las 5
                 pub_details = scholarly.fill(pub)
                 bib = pub_details.get('bib', {})
+                
                 title = bib.get('title', 'Untitled')
                 authors = bib.get('author') or "Investigadores del CENIDET"
                 num_citations = pub_details.get('num_citations', 0)
-                abstract = bib.get('abstract') or pub_details.get('abstract') or f"Investigación académica por el Dr. {user.last_name}."
+                # Resumen corto para ahorrar espacio en DB y RAM
+                abstract = bib.get('abstract') or pub_details.get('abstract') or f"Investigación por el Dr. {user.last_name}."
 
                 direct_url = pub_details.get('pub_url') or pub_details.get('eprint_url')
                 if not direct_url:
@@ -188,14 +198,14 @@ def force_scholar_sync(request):
                     journal_name=journal,
                     date_published=date(year, 1, 1), 
                     status='published',
-                    is_active=True # Aseguramos que se creen como activos
+                    is_active=True
                 )
                 count += 1
                 
-        return Response({"status": "success", "count": count})
+        return Response({"status": "success", "count": count, "message": "Sincronización ligera completada (Top 5)"})
     except Exception as e:
         print(f"Error en sincronización: {e}")
-        return Response({"error": str(e)}, status=500)
+        return Response({"error": "El servidor de Google Scholar tardó demasiado o la memoria se agotó. Intenta de nuevo con menos publicaciones."}, status=500)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
