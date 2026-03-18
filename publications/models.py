@@ -125,21 +125,17 @@ class Project(models.Model):
         verbose_name = "Proyecto"
         verbose_name_plural = "Proyectos"
 # Importamos el perfil de forma diferida dentro de la función para evitar errores
-@receiver(post_save, sender='accounts.Profile') 
-def auto_sync_scholar_on_create(sender, instance, created, **kwargs):
-    """
-    Sincroniza automáticamente cuando se vincula un ID de Scholar.
-    """
-    if instance.scholar_id:
-        from publications.views import force_scholar_sync
-        from django.test import RequestFactory
-        
-        factory = RequestFactory()
-        # Pasamos el scholar_id en la query para que la función lo detecte
-        request = factory.get(f'/?scholar_id={instance.scholar_id}')
-        
-        try:
-            print(f"--- Sincronizando datos para: {instance.scholar_id} ---")
-            force_scholar_sync(request)
-        except Exception as e:
-            print(f"Error en auto-sincronización: {e}")
+# --- SECCIÓN DE SEÑALES (COMENTADA PARA EVITAR ERROR DE MEMORIA EN RENDER) ---
+# @receiver(post_save, sender='accounts.Profile') 
+# def auto_sync_scholar_on_create(sender, instance, created, **kwargs):
+#     """
+#     Sincroniza automáticamente cuando se vincula un ID de Scholar.
+#     """
+#     if instance.scholar_id:
+#         from publications.views import force_scholar_sync
+#         # ... el resto del código ...
+#         try:
+#             print(f"--- Sincronizando datos para: {instance.scholar_id} ---")
+#             force_scholar_sync(request)
+#         except Exception as e:
+#             print(f"Error en auto-sincronización: {e}")

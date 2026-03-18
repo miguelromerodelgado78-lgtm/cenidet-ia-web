@@ -239,7 +239,7 @@ const Home = () => {
           <div className="flex flex-col items-center">
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-100 mb-6 group-hover:border-[#49a5e6] transition-colors">
               <img 
-                src={doc.image_url ? (doc.image_url.startsWith('http') ? doc.image_url : `http://127.0.0.1:8000${doc.image_url}`) : `https://scholar.googleusercontent.com/citations?view_op=medium_photo&user=${doc.scholar_id}`} 
+                src={doc.image_url ? (doc.image_url.startsWith('http') ? doc.image_url : `https://cenidet-ia-web.onrender.com${doc.image_url}`) : `https://scholar.googleusercontent.com/citations?view_op=medium_photo&user=${doc.scholar_id}`} 
                 className="w-full h-full object-cover" 
                 alt={doc.username} 
               />
