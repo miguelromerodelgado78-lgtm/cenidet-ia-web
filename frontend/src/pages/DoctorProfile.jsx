@@ -4,11 +4,7 @@ import {
   Camera, Edit3, Save, ExternalLink, Loader2, 
   Github, Linkedin, Users, Home as HomeIcon, BookOpen,
   PlusCircle, Award, Calendar, ChevronRight, Megaphone,
-  Cpu, 
-  Globe, 
-  FlaskConical, 
-  Library, 
-  FileText
+  Cpu, Globe, FlaskConical, Library, FileText
 } from 'lucide-react';
 import API from '../api';
 import Footer from '../components/Footer';
@@ -26,34 +22,24 @@ const DoctorProfile = () => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [tempAbstract, setTempAbstract] = useState("");
 
-  
-  // Helper para obtener logos de revistas
-// Helper para obtener logos de revistas
- 
-const getJournalIcon = (journalName) => {
-    const name = (journalName || "").toLowerCase().trim();
+  // --- OBTENER URL BASE DINÁMICA ---
+  // Esto quita el '/api/' del final para poder concatenar rutas de imágenes
+  const baseURL = API.defaults.baseURL.replace('/api/', '');
 
-    // MDPI / Sensors / Mathematics (Ciencia Pura)
+  const getJournalIcon = (journalName) => {
+    const name = (journalName || "").toLowerCase().trim();
     if (name.includes('mdpi') || name.includes('sensors') || name.includes('mathematics') || name.includes('drones')) {
       return <FlaskConical className="w-8 h-8 text-emerald-600" />;
     }
-
-    // IEEE / Computación (Tecnología)
     if (name.includes('ieee') || name.includes('intelligence') || name.includes('computer')) {
       return <Cpu className="w-8 h-8 text-blue-600" />;
     }
-
-    // Nature / Scientific (Investigación Global)
     if (name.includes('nature') || name.includes('scientific') || name.includes('optica')) {
       return <Globe className="w-8 h-8 text-indigo-600" />;
     }
-
-    // Educación / Dilemas (Humanidades)
     if (name.includes('educación') || name.includes('dilemas')) {
       return <Library className="w-8 h-8 text-amber-600" />;
     }
-
-    // Por defecto (Documento)
     return <FileText className="w-8 h-8 text-slate-400" />;
   };
 
@@ -77,80 +63,86 @@ const getJournalIcon = (journalName) => {
     }
   }, [scholar_id]);
 
+  // --- FUNCIÓN DE SINCRONIZACIÓN CORREGIDA ---
+  const handleSync = async () => {
+    if (window.confirm("¿Sincronizar con Google Scholar? Esto tomará unos segundos debido al límite de RAM del servidor.")) {
+      try {
+        setLoading(true);
+        // Usamos la instancia API que ya sabe si ir a localhost o Render
+        await API.get(`force-sync/?scholar_id=${scholar_id}`);
+        alert("¡Sincronización exitosa!");
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert("Error en la sincronización. Verifica tu conexión o intenta más tarde.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   const handleSaveAbstract = async (index, publicationId) => {
-  try {
-    const token = localStorage.getItem('access_token');
-    // IMPORTANTE: Cambiamos la URL a la ruta estándar de DRF
-    // Antes: `publications/${publicationId}/update-abstract/`
-    // Ahora: `publications/${publicationId}/` 
-    await API.patch(`publications/${publicationId}/`, 
-      { abstract: tempAbstract }, 
-      { headers: { 'Authorization': `Bearer ${token}` } }
-    );
+    try {
+      const token = localStorage.getItem('access_token');
+      await API.patch(`publications/${publicationId}/`, 
+        { abstract: tempAbstract }, 
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      const updatedData = {...data};
+      updatedData.publications[index].abstract = tempAbstract;
+      setData(updatedData);
+      setEditingIndex(null);
+    } catch (err) {
+      console.error(err);
+      alert("Error al guardar cambios.");
+    }
+  };
 
-    const updatedData = {...data};
-    updatedData.publications[index].abstract = tempAbstract;
-    setData(updatedData);
-    setEditingIndex(null);
-  } catch (err) {
-    console.error(err);
-    alert("Error al guardar cambios. Asegúrate de estar autenticado.");
-  }
-};
-const handleImageUpload = async (e, pubId) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const handleImageUpload = async (e, pubId) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await API.patch(`publications/${pubId}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const updatedPubs = data.publications.map(p => 
+        p.id === pubId ? { ...p, image: response.data.image } : p
+      );
+      setData({ ...data, publications: updatedPubs });
+      alert("¡Imagen guardada!");
+    } catch (err) {
+      console.error(err);
+      alert("Error al subir imagen.");
+    }
+  };
 
-  const formData = new FormData();
-  formData.append('image', file); // 'image' debe coincidir con el nombre en el modelo de Django
-
-  try {
-    const token = localStorage.getItem('access_token');
-    const response = await API.patch(`publications/${pubId}/`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    // IMPORTANTE: Actualizar el estado con la URL que devuelve Django
-    const updatedPubs = data.publications.map(p => 
-      p.id === pubId ? { ...p, image: response.data.image } : p
-    );
-    
-    setData({ ...data, publications: updatedPubs });
-    alert("¡Imagen guardada en el servidor!");
-    
-  } catch (err) {
-    console.error("Error al subir:", err.response?.data || err);
-    alert("Error al guardar en la base de datos");
-  }
-};
-const handleUploadPhoto = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const formData = new FormData();
-  formData.append('profile_photo', file); // Asegúrate que el nombre coincida con tu modelo de Doctor/Scholar
-
-  try {
-    const token = localStorage.getItem('access_token');
-    // Ajusta esta URL según tu endpoint de actualización de perfil
-    const response = await API.patch(`scholar-data/${scholar_id}/`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    // Actualizamos el estado de los datos del doctor
-    setData({ ...data, profile_photo: response.data.profile_photo });
-    alert("Foto de perfil actualizada");
-  } catch (err) {
-    console.error(err);
-    alert("Error al subir la foto de perfil");
-  }
-};
+  const handleUploadPhoto = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('profile_photo', file);
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await API.patch(`scholar-data/${scholar_id}/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      setData({ ...data, profile_photo: response.data.profile_photo });
+      alert("Foto de perfil actualizada");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Error al subir la foto de perfil");
+    }
+  };
 
   const categorized = useMemo(() => ({
     phd: students.filter(s => s.category === 'phd'),
@@ -170,18 +162,7 @@ const handleUploadPhoto = async (e) => {
   if (!data) return <div className="p-20 text-center font-bold text-slate-400 uppercase tracking-widest">Perfil no disponible</div>;
 
   return (
-    <div 
-      className="bg-[#f8fafc] min-h-screen font-sans text-slate-900 select-none"
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      {/* select-none: Evita que el usuario pueda arrastrar el mouse para sombrear texto.
-          onContextMenu: Bloquea el menú del botón derecho (donde sale "Copiar").
-      */}
-      
-      {/* NAVEGACIÓN CORPORATIVA */}
-      <nav className="bg-[#072146] text-white sticky top-0 z-50 border-b border-white/10 shadow-lg"></nav>
-      
-      {/* NAVEGACIÓN CORPORATIVA */}
+    <div className="bg-[#f8fafc] min-h-screen font-sans text-slate-900 select-none" onContextMenu={(e) => e.preventDefault()}>
       <nav className="bg-[#072146] text-white sticky top-0 z-50 border-b border-white/10 shadow-lg">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 flex justify-between items-center h-16">
           <span className="text-[10px] font-black tracking-[0.3em] uppercase opacity-70">GRUPO INTELIGENCIA ARTIFICIAL</span>
@@ -195,8 +176,7 @@ const handleUploadPhoto = async (e) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveSubTab(tab.id)}
-                className={`flex items-center gap-2 px-2 text-[11px] font-bold uppercase tracking-widest transition-all relative
-                  ${activeSubTab === tab.id ? 'text-[#49a5e6]' : 'text-white/70 hover:text-white'}`}
+                className={`flex items-center gap-2 px-2 text-[11px] font-bold uppercase tracking-widest transition-all relative ${activeSubTab === tab.id ? 'text-[#49a5e6]' : 'text-white/70 hover:text-white'}`}
               >
                 {tab.icon} {tab.label}
                 {activeSubTab === tab.id && <div className="absolute bottom-0 left-0 w-full h-1 bg-[#49a5e6]" />}
@@ -208,14 +188,12 @@ const handleUploadPhoto = async (e) => {
 
       <div className="max-w-7xl mx-auto py-12 px-6 lg:px-10">
         <div className="flex flex-col md:flex-row gap-16">
-          
-          {/* SIDEBAR */}
           <aside className="w-full md:w-80">
             <div className="sticky top-32">
               <div className="relative mb-8">
                 <div className="aspect-square overflow-hidden bg-slate-200 border-b-4 border-[#004481] shadow-md">
                   <img 
-                    src={data.image_url ? (data.image_url.startsWith('http') ? data.image_url : `http://127.0.0.1:8000${data.image_url}`) : `https://scholar.googleusercontent.com/citations?view_op=medium_photo&user=${scholar_id}`} 
+                    src={data.image_url ? (data.image_url.startsWith('http') ? data.image_url : `${baseURL}${data.image_url}`) : `https://scholar.googleusercontent.com/citations?view_op=medium_photo&user=${scholar_id}`} 
                     className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-500" 
                     alt={data.name} 
                   />
@@ -232,42 +210,32 @@ const handleUploadPhoto = async (e) => {
               <div className="h-1 w-12 bg-[#49a5e6] mb-4" />
               <p className="text-[11px] font-bold text-slate-500 mb-6 leading-relaxed uppercase tracking-[0.1em]">{data.affiliation}</p>
               
-   {/* SIDEBAR - Redes Sociales Condicionales */}
-<div className="space-y-4 pt-6 border-t border-slate-200">
-  {/* Google Scholar - Solo si existe scholar_id */}
-  {scholar_id && (
-    <a href={`https://scholar.google.com/citations?user=${scholar_id}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-[#004481] transition-colors uppercase tracking-widest">
-      <Award size={16} className="text-[#49a5e6]"/> Google Scholar
-    </a>
-  )}
-
-  {/* GitHub - Solo si existe github_url */}
-  {data.github_url && (
-    <a href={data.github_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-black transition-colors uppercase tracking-widest">
-      <Github size={16}/> Repository
-    </a>
-  )}
-
-  {/* LinkedIn - Solo si existe linkedin_url */}
-  {data.linkedin_url && (
-    <a href={data.linkedin_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-[#004481] transition-colors uppercase tracking-widest">
-      <Linkedin size={16}/> LinkedIn Profile
-    </a>
-  )}
-
-  {/* Email - Si tienes un campo email en tu data */}
-  {data.email && (
-    <a href={`mailto:${data.email}`} className="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-[#004481] transition-colors uppercase tracking-widest">
-      <Globe size={16} className="text-[#49a5e6]"/> Institutional Email
-    </a>
-  )}
-</div>
+              <div className="space-y-4 pt-6 border-t border-slate-200">
+                {scholar_id && (
+                  <a href={`https://scholar.google.com/citations?user=${scholar_id}`} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-[#004481] transition-colors uppercase tracking-widest">
+                    <Award size={16} className="text-[#49a5e6]"/> Google Scholar
+                  </a>
+                )}
+                {data.github_url && (
+                  <a href={data.github_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-black transition-colors uppercase tracking-widest">
+                    <Github size={16}/> Repository
+                  </a>
+                )}
+                {data.linkedin_url && (
+                  <a href={data.linkedin_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-[#004481] transition-colors uppercase tracking-widest">
+                    <Linkedin size={16}/> LinkedIn Profile
+                  </a>
+                )}
+                {data.email && (
+                  <a href={`mailto:${data.email}`} className="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-[#004481] transition-colors uppercase tracking-widest">
+                    <Globe size={16} className="text-[#49a5e6]"/> Institutional Email
+                  </a>
+                )}
+              </div>
             </div>
           </aside>
 
-          {/* MAIN CONTENT */}
           <main className="flex-1">
-            
             {activeSubTab === 'home' && (
               <div className="space-y-16 animate-in fade-in duration-500">
                 <section>
@@ -303,7 +271,7 @@ const handleUploadPhoto = async (e) => {
                   <h2 className="text-2xl font-bold text-[#072146] uppercase tracking-tighter">PUBLICACIONES</h2>
                   {isOwner && (
                     <button 
-                      onClick={() => { if(window.confirm("¿Sincronizar con Google Scholar?")) window.location.href = `http://localhost:8000/api/force-sync/?scholar_id=${scholar_id}`; }}
+                      onClick={handleSync}
                       className="bg-[#072146] text-white text-[9px] font-black px-5 py-2 hover:bg-[#49a5e6] transition-all uppercase tracking-[0.2em]"
                     >
                       Update Database
@@ -315,98 +283,67 @@ const handleUploadPhoto = async (e) => {
                   {(data.publications || []).map((pub, index) => (
                     <div key={pub.id || index} className="group py-10 first:pt-0">
                       <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-                        
-                 {/* CONTENEDOR DE LOGO DINÁMICO */}
-<div className="relative group/logo w-20 h-20 shrink-0">
-  <div className="w-full h-full bg-slate-50 border border-slate-100 flex items-center justify-center rounded-lg shadow-inner group-hover/logo:border-[#49a5e6] transition-all overflow-hidden">
-    
-{/* Dentro del map de publicaciones en DoctorProfile.jsx */}
-{pub.image ? (
-  <img 
-    src={pub.image.startsWith('http') ? pub.image : `http://localhost:8000${pub.image}`} 
-    className="w-full h-full object-contain p-2" 
-    alt="Journal Logo" 
-  />
-) : (
-  getJournalIcon(pub.journal_name)
-)}
-  </div>
+                        <div className="relative group/logo w-20 h-20 shrink-0">
+                          <div className="w-full h-full bg-slate-50 border border-slate-100 flex items-center justify-center rounded-lg shadow-inner group-hover/logo:border-[#49a5e6] transition-all overflow-hidden">
+                            {pub.image ? (
+                              <img 
+                                src={pub.image.startsWith('http') ? pub.image : `${baseURL}${pub.image}`} 
+                                className="w-full h-full object-contain p-2" 
+                                alt="Journal Logo" 
+                              />
+                            ) : (
+                              getJournalIcon(pub.journal_name)
+                            )}
+                          </div>
+                          {isOwner && (
+                            <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover/logo:opacity-100 cursor-pointer transition-opacity rounded-lg text-white">
+                              <Camera size={20} />
+                              <span className="text-[8px] font-black uppercase mt-1">Upload Logo</span>
+                              <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, pub.id)} />
+                            </label>
+                          )}
+                        </div>
 
-  {/* Overlay de subida (Solo para el dueño) */}
-  {isOwner && (
-    <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover/logo:opacity-100 cursor-pointer transition-opacity rounded-lg text-white">
-      <Camera size={20} />
-      <span className="text-[8px] font-black uppercase mt-1">Upload Logo</span>
-      <input 
-        type="file" 
-        className="hidden" 
-        accept="image/*"
-        onChange={(e) => handleImageUpload(e, pub.id)}
-      />
-    </label>
-  )}
-</div>
-<div className="flex-1 space-y-1">
-  {/* 1. TÍTULO: Estilo Scholar (Azul, sin mayúsculas forzadas, con subrayado al pasar el mouse) */}
-  <h3 className="text-[19px] font-bold text-[#1a0dab] leading-snug hover:underline cursor-pointer transition-all tracking-tight">
-    {pub.title}
-  </h3>
+                        <div className="flex-1 space-y-1">
+                          <h3 className="text-[19px] font-bold text-[#1a0dab] leading-snug hover:underline cursor-pointer transition-all tracking-tight">
+                            {pub.title}
+                          </h3>
+                          <div className="text-[14px] text-[#006621] font-medium leading-relaxed">
+                            {pub.authors_list || "Cargando autores investigadores..."}
+                          </div>
+                          <div className="text-[13px] text-slate-500 flex items-center gap-1 font-medium">
+                            <span className="text-slate-600">{pub.journal_name || "Academic Journal"}</span>
+                            <span>, {pub.year || "2024"}</span>
+                            {pub.citations > 0 && (
+                              <>
+                                <span className="mx-1">•</span>
+                                <span className="text-[#1a0dab] hover:underline cursor-pointer">Citado por {pub.citations}</span>
+                              </>
+                            )}
+                          </div>
 
-  {/* 2. AUTORES REALES: Estilo Scholar (Verde Académico) */}
-  <div className="text-[14px] text-[#006621] font-medium leading-relaxed">
-    {/* Esta es la variable que creamos en models.py y serializers.py */}
-    {pub.authors_list || "Cargando autores investigadores..."}
-  </div>
-
-  {/* 3. METADATOS: Estilo Scholar (Revista, Año y Citas) */}
-  <div className="text-[13px] text-slate-500 flex items-center gap-1 font-medium">
-    <span className="text-slate-600">
-      {pub.journal_name || "Academic Journal"}
-    </span>
-    {/* Usamos 'year' que viene limpio del SerializerMethodField */}
-    <span>, {pub.year || "2024"}</span>
-    
-    {/* Mostramos el "Citado por" solo si tiene citas, igual que en Google */}
-    {pub.citations > 0 && (
-      <>
-        <span className="mx-1">•</span>
-        <span className="text-[#1a0dab] hover:underline cursor-pointer">
-          Citado por {pub.citations}
-        </span>
-      </>
-    )}
-  </div>
-
-  {/* 4. EL ABSTRACT Y EDICIÓN (Mantenemos tu lógica funcional) */}
-  {editingIndex === index ? (
-    <div className="mt-4 bg-slate-50 p-6 border border-slate-200 animate-in fade-in zoom-in-95">
-      <textarea 
-        className="w-full bg-white p-4 border border-slate-200 text-sm h-32 outline-none focus:border-[#49a5e6] font-mono" 
-        value={tempAbstract} 
-        onChange={e => setTempAbstract(e.target.value)} 
-      />
-      <div className="flex gap-4 mt-4">
-        <button 
-          onClick={() => handleSaveAbstract(index, pub.id)} 
-          className="bg-[#072146] text-white text-[10px] px-8 py-2 uppercase font-black flex items-center gap-2 hover:bg-[#49a5e6] transition-colors"
-        >
-          <Save size={14}/> Finalize Changes
-        </button>
-        <button 
-          onClick={() => setEditingIndex(null)} 
-          className="text-[10px] uppercase font-bold text-slate-400 hover:text-red-500 transition-colors"
-        >
-          Discard
-        </button>
-      </div>
-    </div>
-  ) : (
-    /* Abstract más limpio, limitado a 2 líneas para no saturar la vista */
-    <p className="text-sm text-slate-500 font-normal leading-relaxed max-w-3xl mt-2 line-clamp-2">
-      {pub.abstract || "Resumen técnico no disponible."}
-    </p>
-  )}
-</div>
+                          {editingIndex === index ? (
+                            <div className="mt-4 bg-slate-50 p-6 border border-slate-200 animate-in fade-in zoom-in-95">
+                              <textarea 
+                                className="w-full bg-white p-4 border border-slate-200 text-sm h-32 outline-none focus:border-[#49a5e6] font-mono" 
+                                value={tempAbstract} 
+                                onChange={e => setTempAbstract(e.target.value)} 
+                              />
+                              <div className="flex gap-4 mt-4">
+                                <button onClick={() => handleSaveAbstract(index, pub.id)} className="bg-[#072146] text-white text-[10px] px-8 py-2 uppercase font-black flex items-center gap-2 hover:bg-[#49a5e6] transition-colors">
+                                  <Save size={14}/> Finalize Changes
+                                </button>
+                                <button onClick={() => setEditingIndex(null)} className="text-[10px] uppercase font-bold text-slate-400 hover:text-red-500 transition-colors">
+                                  Discard
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-slate-500 font-normal leading-relaxed max-w-3xl mt-2 line-clamp-2">
+                              {pub.abstract || "Resumen técnico no disponible."}
+                            </p>
+                          )}
+                        </div>
 
                         <div className="flex flex-col gap-2 shrink-0">
                           <a href={pub.external_url} target="_blank" rel="noopener noreferrer" className="p-3 border border-slate-200 text-slate-400 hover:text-[#004481] hover:border-[#004481] transition-all shadow-sm flex items-center justify-center">
@@ -426,42 +363,35 @@ const handleUploadPhoto = async (e) => {
             )}
 
             {activeSubTab === 'group' && (
-  <div className="space-y-12 animate-in fade-in duration-500">
-    <h2 className="text-2xl font-bold text-[#072146] uppercase mb-10 tracking-tighter"></h2>
-    
-    {/* 1. Actualizamos la lista con 'Maestría' */}
-    {[
-      { id: 'phd', label: 'Doctorado', singular: 'Doctorado', plural: 'Doctorados' }, 
-      { id: 'undergrad', label: 'Maestría', singular: 'Maestría', plural: 'Maestrías' }, 
-      { id: 'alumni', label: 'Egresados', singular: 'Egresado', plural: 'Egresados' }
-    ].map(cat => {
-      const count = categorized[cat.id].length;
-      
-      {/* 2. Lógica para determinar si es 1 Doctorado o 2 Doctorados, etc. */}
-      const labelText = count === 1 ? cat.singular : cat.plural;
-
-      return (
-        <div key={cat.id} className="border-t-2 border-slate-100 pt-8">
-          <h3 className="text-[10px] font-black text-[#49a5e6] uppercase tracking-[0.3em] mb-8">
-            {count} {labelText}
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {categorized[cat.id].map(student => (
-              <div key={student.id} className="flex items-center gap-5 p-5 bg-white border border-slate-100 hover:border-slate-300 transition-all shadow-sm">
-                <div className="w-1.5 h-6 bg-[#072146]" />
-                <div>
-                  <p className="text-[12px] font-black text-slate-800 uppercase tracking-widest">{student.name}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{student.description}</p>
-                </div>
+              <div className="space-y-12 animate-in fade-in duration-500">
+                {[
+                  { id: 'phd', label: 'Doctorado', singular: 'Doctorado', plural: 'Doctorados' }, 
+                  { id: 'undergrad', label: 'Maestría', singular: 'Maestría', plural: 'Maestrías' }, 
+                  { id: 'alumni', label: 'Egresados', singular: 'Egresado', plural: 'Egresados' }
+                ].map(cat => {
+                  const count = categorized[cat.id].length;
+                  const labelText = count === 1 ? cat.singular : cat.plural;
+                  return (
+                    <div key={cat.id} className="border-t-2 border-slate-100 pt-8">
+                      <h3 className="text-[10px] font-black text-[#49a5e6] uppercase tracking-[0.3em] mb-8">
+                        {count} {labelText}
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {categorized[cat.id].map(student => (
+                          <div key={student.id} className="flex items-center gap-5 p-5 bg-white border border-slate-100 hover:border-slate-300 transition-all shadow-sm">
+                            <div className="w-1.5 h-6 bg-[#072146]" />
+                            <div>
+                              <p className="text-[12px] font-black text-slate-800 uppercase tracking-widest">{student.name}</p>
+                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{student.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        </div>
-      );
-    })}
-  </div>
-)}
+            )}
 
             {activeSubTab === 'teaching' && (
               <div className="animate-in fade-in duration-500">
@@ -479,7 +409,6 @@ const handleUploadPhoto = async (e) => {
                 </div>
               </div>
             )}
-
           </main>
         </div>
       </div>
