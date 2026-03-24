@@ -1,14 +1,12 @@
 import React from 'react';
-import { Target, Eye, Rocket, Shield, BrainCircuit } from 'lucide-react';
+import { Target, Eye, BrainCircuit } from 'lucide-react';
 import Footer from '../components/Footer';
-
 
 const AboutUs = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-    
-
-      {/* 2. CONTENIDO PRINCIPAL */}
+    <div className="min-h-screen flex flex-col bg-white">
+      
+      {/* CONTENIDO PRINCIPAL */}
       <main className="flex-grow">
         <section id="conocenos" className="py-24 bg-white overflow-hidden">
           <div className="max-w-7xl mx-auto px-6">
@@ -31,7 +29,7 @@ const AboutUs = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               
-              {/* COLUMNA IZQUIERDA: TEXTO INFORMATIVO */}
+              {/* COLUMNA IZQUIERDA: TEXTO INFORMATIVO Y TARJETAS */}
               <div className="space-y-8">
                 <div className="prose prose-slate">
                   <p className="text-slate-600 leading-relaxed text-lg">
@@ -42,27 +40,29 @@ const AboutUs = () => {
                   </p>
                 </div>
 
-                {/* MISION Y VISION ESTILO TARJETAS BANCARIAS */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
-                  <div className="bg-slate-50 p-8 border-t-4 border-[#072146] shadow-sm">
-                    <Target className="text-[#49a5e6] mb-4" size={32} />
-                    <h4 className="text-[#072146] font-black uppercase text-xs tracking-widest mb-3">Misión</h4>
-                    <p className="text-xs text-slate-500 leading-relaxed font-bold">
-                      Generar conocimiento científico y tecnológico original a través de la investigación en IA para fortalecer la soberanía tecnológica de México.
+                {/* MISION Y VISION ACTUALIZADAS (Más grandes) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+                  {/* TARJETA MISIÓN */}
+                  <div className="bg-slate-50 p-8 border-t-4 border-[#072146] shadow-sm hover:shadow-md transition-all">
+                    <Target className="text-[#49a5e6] mb-4" size={36} />
+                    <h4 className="text-[#072146] font-black uppercase text-sm tracking-widest mb-4">Misión</h4>
+                    <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                      Generar conocimiento científico y tecnológico original a través de la investigación en Inteligencia Artificial para fortalecer la soberanía tecnológica de México.
                     </p>
                   </div>
 
-                  <div className="bg-[#072146] p-8 border-t-4 border-[#49a5e6] shadow-xl text-white">
-                    <Eye className="text-[#49a5e6] mb-4" size={32} />
-                    <h4 className="text-white font-black uppercase text-xs tracking-widest mb-3">Visión</h4>
-                    <p className="text-xs text-slate-300 leading-relaxed font-bold">
-                      Ser referentes internacionales en Inteligencia Artificial Generativa, reconocidos por la excelencia de nuestros egresados y el impacto de nuestras patentes.
+                  {/* TARJETA VISIÓN */}
+                  <div className="bg-[#072146] p-8 border-t-4 border-[#49a5e6] shadow-xl text-white hover:scale-[1.02] transition-all">
+                    <Eye className="text-[#49a5e6] mb-4" size={36} />
+                    <h4 className="text-white font-black uppercase text-sm tracking-widest mb-4">Visión</h4>
+                    <p className="text-sm text-slate-200 leading-relaxed font-medium">
+                      Ser referentes internacionales en Inteligencia Artificial Generativa, reconocidos por la excelencia de nuestros egresados y el impacto global de nuestras patentes.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* COLUMNA DERECHA: IMAGEN */}
+              {/* COLUMNA DERECHA: IMAGEN PROMO */}
               <div className="relative">
                 <div className="absolute -top-10 -right-10 w-64 h-64 bg-[#49a5e6]/10 rounded-full blur-3xl"></div>
                 
@@ -85,7 +85,7 @@ const AboutUs = () => {
                   </div>
                 </div>
 
-                {/* Estadísticas rápidas (Solo una vez) */}
+                {/* Estadísticas rápidas */}
                 <div className="absolute -bottom-6 -left-6 bg-white shadow-xl p-6 border-l-4 border-[#49a5e6] z-20 hidden md:block">
                   <span className="block text-2xl font-black text-[#072146]">100%</span>
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Investigadores SNI</span>
@@ -97,7 +97,6 @@ const AboutUs = () => {
         </section>
       </main>
 
-      {/* 3. PIE DE PÁGINA */}
       <Footer />
     </div>
   );

@@ -395,7 +395,7 @@ const DoctorProfile = () => {
 
             {activeSubTab === 'teaching' && (
               <div className="animate-in fade-in duration-500">
-                <h2 className="text-2xl font-bold text-[#072146] uppercase mb-10 tracking-tighter">Enseñanza</h2>
+                <h2 className="text-2xl font-bold text-[#072146] uppercase mb-10 tracking-tighter">MATERIAS IMPARTIDAS</h2>
                 <div className="space-y-1">
                   {courses.map(course => (
                     <a key={course.id} href={course.link} target="_blank" rel="noreferrer" className="flex items-center justify-between p-8 bg-white border border-slate-100 hover:bg-slate-50 transition-all group shadow-sm">

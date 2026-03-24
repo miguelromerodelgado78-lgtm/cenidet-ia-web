@@ -60,23 +60,26 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* BARRA AZUL (Navegación) */}
-      <nav className={`bg-[#072146] text-white transition-all duration-300 ${isOpen ? 'block' : 'hidden lg:block'}`}>
-        <div className="max-w-7xl mx-auto px-8 py-3 flex flex-col lg:flex-row justify-end items-center gap-6 lg:gap-8 font-bold text-[11px] lg:text-[10px] uppercase tracking-[0.15em]">
-          
-          <button onClick={(e) => handleScroll(e, 'hero')} className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0">Inicio</button>
-          
-          <Link 
-            to="/conocenos" 
-            onClick={() => setIsOpen(false)}
-            className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0"
-          >
-            Conócenos
-          </Link>
-          
-          <button onClick={(e) => handleScroll(e, 'noticias')} className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0">Noticias</button>
-          <button onClick={(e) => handleScroll(e, 'equipo')} className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0">Equipo</button>
-          <button onClick={(e) => handleScroll(e, 'proyectos')} className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0">Proyectos</button>
+{/* BARRA AZUL (Navegación) */}
+<nav className={`bg-[#072146] text-white transition-all duration-300 ${isOpen ? 'block' : 'hidden lg:block'}`}>
+  {/* He quitado 'uppercase' de la siguiente línea para que respete las minúsculas */}
+  <div className="max-w-7xl mx-auto px-8 py-3 flex flex-col lg:flex-row justify-end items-center gap-6 lg:gap-8 font-bold text-[11px] lg:text-[10px] tracking-[0.15em]">
+    
+    <button onClick={(e) => handleScroll(e, 'hero')} className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0">Inicio</button>
+    
+    <Link 
+      to="/conocenos" 
+      onClick={() => setIsOpen(false)}
+      className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0"
+    >
+      Conócenos  {/* <-- Aquí ya está en minúsculas */}
+    </Link>
+    
+    <button onClick={(e) => handleScroll(e, 'noticias')} className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0">Noticias</button>
+    <button onClick={(e) => handleScroll(e, 'equipo')} className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0">Equipo</button>
+    <button onClick={(e) => handleScroll(e, 'proyectos')} className="hover:text-[#49a5e6] transition-colors w-full lg:w-auto text-center py-2 lg:py-0">Proyectos</button>
+
+    {/* ... resto del código (Sección de Login) ... */}
 
           {/* LOGIN / USER SECTION */}
           <div className="w-full lg:w-auto flex justify-center pt-4 lg:pt-0 border-t border-white/10 lg:border-none">
