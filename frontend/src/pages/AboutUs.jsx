@@ -33,7 +33,7 @@ const AboutUs = () => {
               <div className="space-y-8">
                 <div className="prose prose-slate">
                   <p className="text-slate-600 leading-relaxed text-lg">
-                    El **Centro Nacional de Investigación y Desarrollo Tecnológico (CENIDET)** es un pilar fundamental del TecNM. Nuestro grupo de investigación en **Inteligencia Artificial** se dedica a la creación de soluciones disruptivas, integrando algoritmos de aprendizaje profundo y modelos generativos para resolver problemas complejos de la industria y la sociedad.
+                    El <b>Centro Nacional de Investigación y Desarrollo Tecnológico (CENIDET)</b> es un pilar fundamental del TecNM. Nuestro grupo de investigación en **Inteligencia Artificial** se dedica a la creación de soluciones disruptivas, integrando algoritmos de aprendizaje profundo y modelos generativos para resolver problemas complejos de la industria y la sociedad.
                   </p>
                   <p className="text-slate-600 leading-relaxed mt-4">
                     Formamos investigadores de alto nivel capaces de liderar la transformación digital, manteniendo siempre un compromiso ético y humano en el desarrollo de la IA.

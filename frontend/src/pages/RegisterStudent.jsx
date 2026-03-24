@@ -9,7 +9,7 @@ const RegisterStudent = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'phd', // Valor por defecto
+    category: 'phd', 
     link: ''
   });
 
@@ -23,7 +23,7 @@ const RegisterStudent = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("¡Estudiante añadido al grupo de investigación!");
-      navigate('/dashboard'); // Regresamos al panel
+      navigate('/dashboard'); 
     } catch (err) {
       console.error(err);
       alert("Hubo un error al registrar al alumno. Intenta de nuevo.");
@@ -33,79 +33,87 @@ const RegisterStudent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#f1f5f9] p-8 flex flex-col items-center font-sans">
+      <div className="w-full max-w-2xl">
         
-        {/* BOTÓN REGRESAR */}
-        <Link to="/dashboard" className="flex items-center gap-2 text-gray-500 hover:text-blue-700 transition font-bold mb-8 text-sm uppercase tracking-widest">
-          <ArrowLeft size={18} /> Volver al Panel
-        </Link>
+        {/* BOTÓN VOLVER AL PANEL RESALTADO */}
+        <div className="mb-8">
+          <Link 
+            to="/dashboard" 
+            className="inline-flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 text-[#072146] font-black uppercase text-[11px] tracking-[0.2em] shadow-sm hover:bg-[#072146] hover:text-white hover:border-[#072146] hover:shadow-md transition-all duration-300 rounded-sm group"
+          >
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+            Volver al Panel de Control
+          </Link>
+        </div>
 
-        <div className="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden">
-          {/* ENCABEZADO */}
-          <div className="bg-[#002d55] p-10 text-white flex items-center gap-4">
-             <div className="bg-white/20 p-3 rounded-2xl">
+        <div className="bg-white shadow-2xl border border-slate-200 overflow-hidden rounded-sm">
+          {/* ENCABEZADO ESTILO INSTITUCIONAL */}
+          <div className="bg-[#072146] p-10 text-white border-b-4 border-[#49a5e6]">
+            <div className="flex items-center gap-5">
+              <div className="bg-white/10 p-4 rounded-xl text-[#49a5e6]">
                 <UserPlus size={32} />
-             </div>
-             <div>
-                <h2 className="text-3xl font-black uppercase tracking-tighter">Nuevo Estudiante</h2>
-                <p className="text-blue-200 text-sm italic">Agrégalo a tu grupo de investigación</p>
-             </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-black uppercase tracking-tighter italic">Nuevo Estudiante</h2>
+                <p className="text-[#49a5e6] text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Gestión de Grupo de Investigación</p>
+              </div>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="p-10 space-y-8">
             
             {/* NOMBRE COMPLETO */}
             <div>
-              <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-400 mb-3 tracking-widest">
-                 <UserPlus size={14} /> Nombre del Alumno
+              <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 tracking-widest flex items-center gap-2">
+                <UserPlus size={14} /> Nombre del Alumno
               </label>
               <input 
                 type="text" required
-                className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 focus:bg-white rounded-2xl outline-none transition font-bold text-gray-700 shadow-inner"
-                placeholder="Ej: Eric Ji"
+                className="w-full p-4 bg-slate-50 border border-slate-200 focus:border-[#49a5e6] outline-none text-sm font-bold text-[#072146] uppercase"
+                placeholder="Ej: ERIC JI"
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
               />
             </div>
 
             {/* CATEGORÍA */}
             <div>
-              <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-400 mb-3 tracking-widest">
-                 <GraduationCap size={14} /> Nivel Académico
+              <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 tracking-widest flex items-center gap-2">
+                <GraduationCap size={14} /> Nivel Académico
               </label>
               <select 
-                className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 focus:bg-white rounded-2xl outline-none transition font-bold text-gray-700 shadow-inner appearance-none"
+                className="w-full p-4 bg-slate-50 border border-slate-200 focus:border-[#49a5e6] outline-none text-sm font-bold text-[#072146] appearance-none cursor-pointer"
                 value={formData.category}
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
               >
-                <option value="phd">Estudiante de Doctorado</option>
-                <option value="undergrad">Estudiante de Pregrado</option>
-                <option value="alumni">Antiguo Alumno / Egresado</option>
+                <option value="phd">ESTUDIANTE DE DOCTORADO</option>
+                <option value="undergrad">ESTUDIANTE DE PREGRADO</option>
+                <option value="alumni">ANTIGUO ALUMNO / EGRESADO</option>
               </select>
             </div>
 
             {/* DESCRIPCIÓN / ESTADO */}
             <div>
-              <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-400 mb-3 tracking-widest">
-                 <Info size={14} /> Descripción de apoyo
+              <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 tracking-widest flex items-center gap-2">
+                <Info size={14} /> Descripción de Apoyo / Estatus
               </label>
               <input 
                 type="text" required
-                className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 focus:bg-white rounded-2xl outline-none transition font-bold text-gray-700 shadow-inner"
-                placeholder="Ej: desde otoño de 2025 o coasesorado por el profesor Minh Do"
+                className="w-full p-4 bg-slate-50 border border-slate-200 focus:border-[#49a5e6] outline-none text-sm font-medium"
+                placeholder="Ej: Desde otoño de 2025 o coasesorado por el profesor Minh Do"
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
               />
             </div>
 
             {/* LINK (OPCIONAL) */}
             <div>
-              <label className="flex items-center gap-2 text-xs font-black uppercase text-gray-400 mb-3 tracking-widest">
-                 <LinkIcon size={14} /> Perfil Personal o LinkedIn (Opcional)
+              <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 tracking-widest flex items-center gap-2">
+                <LinkIcon size={14} /> Perfil Personal o LinkedIn (Opcional)
               </label>
               <input 
                 type="url"
-                className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-600 focus:bg-white rounded-2xl outline-none transition font-bold text-gray-700 shadow-inner"
-                placeholder="https://..."
+                className="w-full p-4 bg-slate-50 border border-slate-200 focus:border-[#49a5e6] outline-none text-sm"
+                placeholder="https://linkedin.com/in/perfil"
                 onChange={(e) => setFormData({...formData, link: e.target.value})}
               />
             </div>
@@ -114,9 +122,9 @@ const RegisterStudent = () => {
             <button 
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-200 transform hover:-translate-y-1 uppercase tracking-widest disabled:opacity-50"
+              className="w-full bg-[#072146] text-white font-black py-5 flex items-center justify-center gap-3 shadow-lg hover:bg-[#49a5e6] transition-all uppercase text-[11px] tracking-[0.3em] disabled:opacity-50 group"
             >
-              {loading ? "Registrando..." : "Confirmar Registro"}
+              {loading ? "PROCESANDO..." : "CONFIRMAR REGISTRO"}
             </button>
 
           </form>

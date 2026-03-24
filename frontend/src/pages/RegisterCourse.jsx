@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Añadimos Link
 import { BookOpen, Save, ArrowLeft, Shield } from 'lucide-react';
 import API from '../api';
 
@@ -12,32 +12,38 @@ const RegisterCourse = () => {
     try {
       const token = localStorage.getItem('access_token');
       await API.post('courses/', formData, { headers: { Authorization: `Bearer ${token}` } });
-      alert("Materia registrada con éxito");
+      alert("¡Materia registrada con éxito!");
       navigate('/dashboard');
-    } catch (err) { alert("Error al registrar"); }
+    } catch (err) { 
+      alert("Error al registrar la materia. Revisa los datos."); 
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#f1f5f9] p-8 flex flex-col items-center font-sans">
       <div className="w-full max-w-xl">
-        {/* BOTÓN VOLVER */}
-        <button 
-          onClick={() => navigate('/dashboard')} 
-          className="flex items-center gap-2 text-[#072146] font-black mb-8 uppercase text-[10px] tracking-widest hover:text-[#49a5e6] transition-all"
-        >
-          <ArrowLeft size={16}/> Volver al Panel
-        </button>
+        
+        {/* BOTÓN VOLVER AL PANEL RESALTADO */}
+        <div className="mb-8">
+          <Link 
+            to="/dashboard" 
+            className="inline-flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 text-[#072146] font-black uppercase text-[11px] tracking-[0.2em] shadow-sm hover:bg-[#072146] hover:text-white hover:border-[#072146] hover:shadow-md transition-all duration-300 rounded-sm group"
+          >
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+            Volver al Panel de Control
+          </Link>
+        </div>
 
-        <div className="bg-white shadow-2xl border border-slate-200 overflow-hidden">
-          {/* CABECERA DEL FORMULARIO */}
-          <div className="bg-[#072146] p-8 border-b-4 border-[#49a5e6]">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/10 text-[#49a5e6] rounded-lg">
-                <BookOpen size={24} />
+        <div className="bg-white shadow-2xl border border-slate-200 overflow-hidden rounded-sm">
+          {/* CABECERA DEL FORMULARIO ESTILO INSTITUCIONAL */}
+          <div className="bg-[#072146] p-10 text-white border-b-4 border-[#49a5e6]">
+            <div className="flex items-center gap-5">
+              <div className="bg-white/10 p-4 rounded-xl text-[#49a5e6]">
+                <BookOpen size={32} />
               </div>
               <div>
-                <h2 className="text-xl font-black text-white uppercase tracking-tighter">Nueva Materia</h2>
-                <p className="text-[#49a5e6] text-[10px] font-bold uppercase tracking-[0.2em]">Registro Académico</p>
+                <h2 className="text-2xl font-black uppercase tracking-tighter italic">Nueva Materia</h2>
+                <p className="text-[#49a5e6] text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Registro de Cátedra y Programa</p>
               </div>
             </div>
           </div>
@@ -47,31 +53,33 @@ const RegisterCourse = () => {
             
             <div className="space-y-6">
               <div>
-                <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 ml-1">Nombre de la Asignatura</label>
+                <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 tracking-widest flex items-center gap-2">
+                  Nombre de la Asignatura
+                </label>
                 <input 
                   type="text" 
-                  placeholder="EJ: INTELIGENCIA ARTIFICIAL" 
-                  className="w-full p-4 bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-[#49a5e6] transition-all uppercase"
+                  placeholder="EJ: INTELIGENCIA ARTIFICIAL GENERATIVA" 
+                  className="w-full p-4 bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-[#49a5e6] transition-all uppercase text-[#072146]"
                   onChange={e => setFormData({...formData, name: e.target.value})} 
                   required 
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 ml-1">Código ID</label>
+                  <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Código ID</label>
                   <input 
                     type="text" 
-                    placeholder="EJ: IA101" 
+                    placeholder="EJ: IA-2026" 
                     className="w-full p-4 bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-[#49a5e6] transition-all uppercase"
                     onChange={e => setFormData({...formData, code: e.target.value})} 
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 ml-1">Periodo / Semestre</label>
+                  <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Periodo Académico</label>
                   <input 
                     type="text" 
-                    placeholder="EJ: AGOSTO-DIC 2025" 
+                    placeholder="EJ: ENE-JUN 2026" 
                     className="w-full p-4 bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-[#49a5e6] transition-all uppercase"
                     onChange={e => setFormData({...formData, semester: e.target.value})} 
                     required 
@@ -80,11 +88,11 @@ const RegisterCourse = () => {
               </div>
 
               <div>
-                <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 ml-1">URL del Programa Académico (Opcional)</label>
+                <label className="text-[9px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Enlace al Temario (Opcional)</label>
                 <input 
                   type="url" 
-                  placeholder="https://ejemplo.com/silabo.pdf" 
-                  className="w-full p-4 bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-[#49a5e6] transition-all"
+                  placeholder="https://cenidet.tecnm.mx/programa.pdf" 
+                  className="w-full p-4 bg-slate-50 border border-slate-200 text-sm font-bold outline-none focus:border-[#49a5e6] transition-all text-slate-600"
                   onChange={e => setFormData({...formData, link: e.target.value})} 
                 />
               </div>
@@ -100,7 +108,7 @@ const RegisterCourse = () => {
 
         {/* NOTA AL PIE */}
         <p className="mt-8 text-center text-slate-400 text-[9px] font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-          <Shield size={12}/> Sistema de Gestión Institucional - Acceso Protegido
+          <Shield size={12}/> Plataforma de Gestión Académica - CENIDET 2026
         </p>
       </div>
     </div>

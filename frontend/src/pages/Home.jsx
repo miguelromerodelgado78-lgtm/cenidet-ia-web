@@ -217,52 +217,65 @@ const Home = () => {
         </section>
       )}
 
-      {/* --- SECCIÓN 3: EQUIPO --- */}
-      <section 
-        id="equipo" 
-        className="py-24 px-6 relative overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(rgba(7, 33, 70, 0.85), rgba(7, 33, 70, 0.85)), url('/fondo3.jpeg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-3xl font-black text-white uppercase tracking-wider">
-              Claustro doctoral
-            </h2>
-            <div className="w-16 h-1 bg-[#49a5e6] mx-auto mt-4"></div>
-          </div>
+      {/* --- SECCIÓN 3: EQUIPO (CLAUSTRO DOCTORAL) --- */}
+<section 
+  id="equipo" 
+  className="py-24 px-6 relative overflow-hidden"
+  style={{
+    backgroundImage: `linear-gradient(rgba(7, 33, 70, 0.9), rgba(7, 33, 70, 0.9)), url('/fondo3.jpeg')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed'
+  }}
+>
+  <div className="max-w-7xl mx-auto relative z-10">
+    {/* TÍTULO DE SECCIÓN */}
+    <div className="text-center mb-20">
+      <h2 className="text-3xl font-black text-white uppercase tracking-[0.2em] italic">
+        Claustro Doctoral
+      </h2>
+      <div className="w-24 h-1.5 bg-[#49a5e6] mx-auto mt-4 shadow-lg"></div>
+    </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {doctors.map(doc => (
-              <Link 
-                key={doc.id} 
-                to={`/doctor/${doc.scholar_id}`} 
-                className="bg-white p-8 rounded-sm shadow-2xl hover:-translate-y-2 transition-all duration-300 group"
-              >
-                <div className="flex flex-col items-center">
-                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-slate-100 mb-6 group-hover:border-[#49a5e6] transition-colors">
-                    <img 
-                      src={doc.image_url ? (doc.image_url.startsWith('http') ? doc.image_url : `${baseURL}${doc.image_url}`) : `https://scholar.googleusercontent.com/citations?view_op=medium_photo&user=${doc.scholar_id}`} 
-                      className="w-full h-full object-cover" 
-                      alt={doc.username} 
-                    />
-                  </div>
-                  <h3 className="text-sm font-black text-[#072146] uppercase text-center">
-                    {doc.first_name} {doc.last_name || doc.username}
-                  </h3>
-                  <div className="mt-6 text-[#49a5e6] text-[9px] font-black uppercase flex items-center gap-2 group-hover:gap-4 transition-all">
-                    Ver Perfil <ArrowRight size={12} />
-                  </div>
-                </div>
-              </Link>
-            ))}
+    {/* GRID DE DOCTORES */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      {doctors.map(doc => (
+        <Link 
+          key={doc.id} 
+          to={`/doctor/${doc.scholar_id}`} 
+          className="bg-white p-10 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:-translate-y-3 transition-all duration-500 group border-b-4 border-transparent hover:border-[#49a5e6]"
+        >
+          <div className="flex flex-col items-center">
+            {/* AVATAR CON EFECTO ZOOM */}
+            <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-slate-100 mb-8 group-hover:border-[#49a5e6] transition-all duration-500 shadow-md group-hover:scale-105">
+              <img 
+                src={doc.image_url ? (doc.image_url.startsWith('http') ? doc.image_url : `${baseURL}${doc.image_url}`) : `https://scholar.googleusercontent.com/citations?view_op=medium_photo&user=${doc.scholar_id}`} 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                alt={doc.username} 
+              />
+            </div>
+
+            {/* NOMBRE DEL DOCTOR */}
+            <h3 className="text-sm font-black text-[#072146] uppercase text-center min-h-[42px] flex items-center leading-tight tracking-tighter">
+              {doc.first_name} {doc.last_name || doc.username}
+            </h3>
+
+            {/* LÍNEA DIVISORA SUTIL */}
+            <div className="w-8 h-0.5 bg-slate-100 my-4 group-hover:w-16 transition-all duration-500"></div>
+
+            {/* BOTÓN "VER PERFIL" CORREGIDO Y MÁS GRANDE */}
+            <div className="mt-4 w-full flex justify-center">
+              <div className="px-6 py-2.5 bg-slate-50 border border-slate-200 text-[#49a5e6] text-[11px] font-black uppercase flex items-center gap-3 transition-all duration-300 group-hover:bg-[#072146] group-hover:text-white group-hover:border-[#072146] group-hover:scale-110 shadow-sm">
+                Ver Perfil 
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </Link>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* --- SECCIÓN 4: PROYECTOS --- */}
       {projects.length > 0 && (

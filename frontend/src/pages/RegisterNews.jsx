@@ -89,9 +89,16 @@ const RegisterNews = () => {
     <div className="min-h-screen bg-[#f1f5f9] p-8 flex flex-col items-center font-sans">
       <div className="w-full max-w-2xl">
         
-        <Link to="/dashboard" className="flex items-center gap-2 text-[#072146] font-black mb-8 uppercase text-[10px] tracking-widest hover:text-[#49a5e6] transition-all">
-          <ArrowLeft size={16} /> Volver al Panel
-        </Link>
+     {/* BOTÓN VOLVER AL PANEL ACTUALIZADO */}
+<div className="mb-8">
+  <Link 
+    to="/dashboard" 
+    className="inline-flex items-center gap-3 px-5 py-3 bg-white border border-slate-200 text-[#072146] font-black uppercase text-[11px] tracking-[0.2em] shadow-sm hover:bg-[#072146] hover:text-white hover:border-[#072146] hover:shadow-md transition-all duration-300 rounded-sm group"
+  >
+    <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+    Volver al Panel de Control
+  </Link>
+</div>
 
         <div className="bg-white shadow-2xl border border-slate-200 overflow-hidden rounded-sm">
           <div className="bg-[#072146] p-10 text-white border-b-4 border-[#49a5e6]">
